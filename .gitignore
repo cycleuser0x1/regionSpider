@@ -1,0 +1,4 @@
+#忽略.idea目录下所有的文件，包括子目录 ps: /.idea  仅忽略项目根目录下的 .idea 文件，不包括 subdir/.idea; doc/*.txt 会忽略 doc/notes.txt 但不包括 doc/server/arch.txt
+.idea/
+#忽略所有后缀名为.iml的文件
+*.iml
