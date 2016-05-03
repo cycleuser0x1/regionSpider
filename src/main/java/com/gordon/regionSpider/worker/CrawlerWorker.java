@@ -4,6 +4,8 @@ import com.gordon.regionSpider.constants.CrawlerParams;
 import com.gordon.regionSpider.fetcher.PageFetcher;
 import com.gordon.regionSpider.filter.ProductFilter;
 import com.gordon.regionSpider.model.DiscountProduct;
+import com.gordon.regionSpider.model.FetchedPage;
+import com.gordon.regionSpider.model.RegionNode;
 import com.gordon.regionSpider.parser.ContentParser;
 import com.gordon.regionSpider.queue.FilteredDiscountProductQueue;
 import com.gordon.regionSpider.storage.DataStorage;
@@ -31,6 +33,34 @@ public class CrawlerWorker implements Runnable {
 
     public CrawlerWorker(int i) {
         this.threadIndex = i;
+    }
+
+
+    public void startCrawl1(RegionNode regionNode) {
+        int size = regionNode.getChildNode().size();
+        if (size > 0) {
+            for (RegionNode node : regionNode.getChildNode()) {
+                startCrawl1(node);
+            }
+        }
+    }
+
+    public void loadRegionNode(RegionNode regionNode) {
+        String url = regionNode.getUrl();
+
+        FetchedPage fetchedPage = pageFetcher.getContentFromUrl(url);
+
+        List<RegionNode> list = (List) contentParser.parseHTML(fetchedPage);
+
+        if (list.size() > 0){
+
+            regionNode.setChildNode(list);
+
+            for(RegionNode node : list){
+
+                loadRegionNode(node);
+            }
+        }
     }
 
     public void startCrawl() {
