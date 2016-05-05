@@ -21,30 +21,6 @@ public class CrawlerStart {
     private static final Logger log = Logger.getLogger(CrawlerStart.class.getName());
 
     public static void main(String[] args) {
-        final PageFetcher pageFetcher = new PageFetcher();
-        final List<DiscountProduct> list = new ArrayList<DiscountProduct>();
-        Timer timer = new Timer();
-        CrawlerWorker crawlerWorker = new CrawlerWorker(1);
-        crawlerWorker.startCrawl();
-        System.out.println("done...");
-        for (DiscountProduct discountProduct : ListStorage.getDiscountProductList()) {
-            if(ProductFilter.isMatch(discountProduct)){
-                FilteredDiscountProductQueue.addElement(discountProduct);
-            }
-        }
-        new Thread(crawlerWorker).start();
-        new Thread(new SendMail()).start();
-        timer.schedule(new TimerTask() {
-            //定时清空保存商品信息的集合,只保留前两页的商品信息
-            @Override
-            public void run() {
-                list.clear();
-                for (int i = 1; i < 3; i++) {
-                    list.addAll(ContentParser.parseHTML(pageFetcher.getContentFromUrl(CrawlerParams.PAGE_URL + Integer.toString(i))));
-                }
-                ListStorage.getDiscountProductList().retainAll(list);
-            }
-        }, CrawlerParams.ONE_DAY, CrawlerParams.ONE_DAY);
     }
 
 }

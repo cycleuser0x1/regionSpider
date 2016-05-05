@@ -45,88 +45,44 @@ public class CrawlerWorker implements Runnable {
         }
     }
 
-    public void loadRegionNode(RegionNode regionNode) {
-        String url = regionNode.getUrl();
+    /**
+     * @param regionNode
+     */
+    public void loadRegionNode(RegionNode regionNode, String superUrl) {
+        String url = subUrl(superUrl) + regionNode.getUrl();
 
         FetchedPage fetchedPage = pageFetcher.getContentFromUrl(url);
 
-        List<RegionNode> list = (List) contentParser.parseHTML(fetchedPage);
+        List<RegionNode> list;
 
-        if (list.size() > 0){
+        //首页数据已经预先加载
+        if (regionNode.getChildNode() == null) {
+
+            list = contentParser.parseHTML(fetchedPage);
+
+        } else {
+            list = regionNode.getChildNode();
+        }
+
+        //当list为null时则可能遍历到叶子节点
+        if (list != null && list.size() > 0) {
 
             regionNode.setChildNode(list);
 
-            for(RegionNode node : list){
+            for (RegionNode node : list) {
 
-                loadRegionNode(node);
+                loadRegionNode(node, url);
             }
         }
     }
 
-    public void startCrawl() {
-        while (true) {
-            List<DiscountProduct> discountProductList =
-                    contentParser.parseHTML(pageFetcher.getContentFromUrl(CrawlerParams.PAGE_URL + page.toString()));
-            //当抓取页面的element不为空时抓取
-            if (discountProductList.size() == 0) {
-//            if (page == 5) {
-                break;
-            }
-            dataStorage.store(discountProductList);
-            try {
-                Thread.sleep(CrawlerParams.INIT_REQUEST_DELAY_TIME);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            page++;
-        }
-        pageFetcher.close();
+    public static String subUrl(String url) {
+        int index = url.lastIndexOf("/") + 1;
+        String truncateUrl = url.substring(0, index);
+        return truncateUrl;
     }
 
-    /**
-     * 运行该线程爬取更新的商品信息
-     */
     public void run() {
-        Integer page = 1;
-        while (true) {
-            PageFetcher pageFetcher = new PageFetcher();
-            List<DiscountProduct> newDetectedList =
-                    contentParser.parseHTML(pageFetcher.getContentFromUrl(CrawlerParams.PAGE_URL + Integer.toString(page)));
-            pageFetcher.close();
-            if (newDetectedList == null) {
-                continue;
-            }
-            //当前页面没有新的商品信息更新
-            if (ListStorage.getDiscountProductList().containsAll(newDetectedList)) {
-                //线程等待后继续抓取页面
-                try {
-                    Thread.sleep(CrawlerParams.REQUEST_DELAY_TIME);
-                    //将抓取页面重置为第一页
-                    page = 1;
-                    continue;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            //当前页面有新的商品信息更新
-            for (DiscountProduct discountProduct : newDetectedList) {
-                //筛选更新的商品信息
-                if (!ListStorage.getDiscountProductList().contains(discountProduct)) {
-                    //将关键字匹配的商品信息加入队列
-                    if (ProductFilter.isMatch(discountProduct)) {
-                        FilteredDiscountProductQueue.addElement(discountProduct);
-                    }
-                    //将更新的商品信息加入保存商品信息的集合
-                    ListStorage.getDiscountProductList().add(discountProduct);
-                }
-            }
-            try {
-                Thread.sleep(CrawlerParams.REQUEST_DELAY_TIME);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            //页面+1，抓取下一页
-            page++;
-        }
+
     }
 }

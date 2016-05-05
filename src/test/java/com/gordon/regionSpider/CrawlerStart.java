@@ -5,11 +5,14 @@ import com.gordon.regionSpider.mail.SendMail;
 import com.gordon.regionSpider.fetcher.PageFetcher;
 import com.gordon.regionSpider.filter.ProductFilter;
 import com.gordon.regionSpider.model.DiscountProduct;
+import com.gordon.regionSpider.model.FetchedPage;
+import com.gordon.regionSpider.model.RegionNode;
 import com.gordon.regionSpider.parser.ContentParser;
 import com.gordon.regionSpider.queue.FilteredDiscountProductQueue;
 import com.gordon.regionSpider.storage.impl.ListStorage;
 import com.gordon.regionSpider.worker.CrawlerWorker;
 import org.apache.log4j.Logger;
+import org.junit.Test;
 
 import java.util.*;
 
@@ -20,30 +23,25 @@ public class CrawlerStart {
     private static final Logger log = Logger.getLogger(CrawlerStart.class.getName());
 
     public static void main(String[] args) {
-        final PageFetcher pageFetcher = new PageFetcher();
-        final List<DiscountProduct> list = new ArrayList<DiscountProduct>();
-        Timer timer = new Timer();
+        PageFetcher pageFetcher = new PageFetcher();
+        FetchedPage fetchedPage = pageFetcher.getContentFromUrl("http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/index.html");
+        List<RegionNode> list = ContentParser.parseIndexHTML(fetchedPage);
+        //构造根节点
+        RegionNode regionNode = new RegionNode();
+        regionNode.setUrl("");
+        regionNode.setRegionName("全国");
+        regionNode.setId("0");
+        regionNode.setChildNode(list);
         CrawlerWorker crawlerWorker = new CrawlerWorker(1);
-        crawlerWorker.startCrawl();
-        System.out.println("done...");
-        for (DiscountProduct discountProduct : ListStorage.getDiscountProductList()) {
-            if(ProductFilter.isMatch(discountProduct)){
-                FilteredDiscountProductQueue.addElement(discountProduct);
-            }
-        }
-        new Thread(crawlerWorker).start();
-        new Thread(new SendMail()).start();
-        timer.schedule(new TimerTask() {
-            //定时清空保存商品信息的集合,只保留前两页的商品信息
-            @Override
-            public void run() {
-                list.clear();
-                for (int i = 1; i < 3; i++) {
-                    list.addAll(ContentParser.parseHTML(pageFetcher.getContentFromUrl(CrawlerParams.PAGE_URL + Integer.toString(i))));
-                }
-                ListStorage.getDiscountProductList().retainAll(list);
-            }
-        }, CrawlerParams.ONE_DAY, CrawlerParams.ONE_DAY);
+        crawlerWorker.loadRegionNode(regionNode,"http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/");
+    }
+
+    @Test
+    public void testSubStr(){
+        CrawlerWorker crawlerWorker = new CrawlerWorker(1);
+        RegionNode regionNode = new RegionNode();
+        regionNode.setUrl("12.html");
+        crawlerWorker.loadRegionNode(regionNode,"http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/");
     }
 
 }
