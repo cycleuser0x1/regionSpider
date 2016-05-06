@@ -38,10 +38,8 @@ public class CrawlerStart {
 
     @Test
     public void testSubStr(){
-        CrawlerWorker crawlerWorker = new CrawlerWorker(1);
-        RegionNode regionNode = new RegionNode();
-        regionNode.setUrl("12.html");
-        crawlerWorker.loadRegionNode(regionNode,"http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/");
+        String code = "210201001000";
+        System.out.println(code.substring(6,9));
     }
 
 }

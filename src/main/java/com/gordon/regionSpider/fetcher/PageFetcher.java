@@ -64,6 +64,7 @@ public class PageFetcher {
         Date now = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         log.info("request url:"+ url);
+        System.out.println("url:" + url);
         HttpResponse response;
         //为了防止请求服务器出现异常，此处要捕获所有异常
         try {

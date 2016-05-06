@@ -36,25 +36,16 @@ public class CrawlerWorker implements Runnable {
     }
 
 
-    public void startCrawl1(RegionNode regionNode) {
-        int size = regionNode.getChildNode().size();
-        if (size > 0) {
-            for (RegionNode node : regionNode.getChildNode()) {
-                startCrawl1(node);
-            }
-        }
-    }
-
     /**
      * @param regionNode
      */
     public void loadRegionNode(RegionNode regionNode, String superUrl) {
+
         String url = subUrl(superUrl) + regionNode.getUrl();
 
         FetchedPage fetchedPage = pageFetcher.getContentFromUrl(url);
 
         List<RegionNode> list;
-
         //首页数据已经预先加载
         if (regionNode.getChildNode() == null) {
 
@@ -67,20 +58,26 @@ public class CrawlerWorker implements Runnable {
         //当list为null时则可能遍历到叶子节点
         if (list != null && list.size() > 0) {
 
+            //将子节点插入
             regionNode.setChildNode(list);
 
             for (RegionNode node : list) {
+                //该节点为叶子节点且为最后一级
+                if(node.getUrl() == null && node.getId().substring(7,11) != "000" ){
+                    break;
+                }
 
                 loadRegionNode(node, url);
             }
         }
     }
 
-    public static String subUrl(String url) {
+    private String subUrl(String url) {
         int index = url.lastIndexOf("/") + 1;
         String truncateUrl = url.substring(0, index);
         return truncateUrl;
     }
+
 
     public void run() {
 

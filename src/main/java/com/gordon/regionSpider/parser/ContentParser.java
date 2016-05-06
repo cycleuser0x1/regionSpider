@@ -40,6 +40,20 @@ public class ContentParser {
             Element tr = trSet.get(i);
             Elements elements = tr.getAllElements();
 
+            //当子元素数量等于3时，说明为没有子节点的市辖区
+            if (elements.size() == 3) {
+                Element codeTdTag = elements.get(1);
+                Element nameTdTag = elements.get(2);
+                String name = nameTdTag.text();
+                String code = codeTdTag.text();
+                RegionNode regionNode = new RegionNode();
+                regionNode.setRegionName(name);
+                regionNode.setId(code);
+                regionNodeList.add(regionNode);
+                System.out.println("code:"+code+";name:"+name);
+                continue;
+            }
+
             //当子元素数量等于4时，说明为叶子节点
             if (elements.size() == 4) {
                 Element codeTdTag = elements.get(1);
