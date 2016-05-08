@@ -20,6 +20,8 @@ import java.util.logging.Logger;
 public class CrawlerWorker implements Runnable {
     private static final Logger Log = Logger.getLogger(CrawlerWorker.class.getName());
 
+    public static Integer count = 0;
+
     private PageFetcher pageFetcher = new PageFetcher();
 
     private ContentParser contentParser = new ContentParser();
@@ -39,7 +41,9 @@ public class CrawlerWorker implements Runnable {
     /**
      * @param regionNode
      */
-    public void loadRegionNode(RegionNode regionNode, String superUrl) {
+    public RegionNode loadRegionNode(RegionNode regionNode, String superUrl) {
+
+        count++;
 
         String url = subUrl(superUrl) + regionNode.getUrl();
 
@@ -70,6 +74,7 @@ public class CrawlerWorker implements Runnable {
                 loadRegionNode(node, url);
             }
         }
+        return regionNode;
     }
 
     private String subUrl(String url) {

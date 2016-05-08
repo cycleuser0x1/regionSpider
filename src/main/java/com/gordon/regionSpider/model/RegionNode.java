@@ -10,6 +10,7 @@ public class RegionNode {
     private String regionName;
     private String id;
     private List<RegionNode> childNode;
+    private String pId;
 
     public String getUrl() {
         return url;
@@ -41,5 +42,13 @@ public class RegionNode {
 
     public void setChildNode(List<RegionNode> childNode) {
         this.childNode = childNode;
+    }
+
+    public String getpId() {
+        return pId;
+    }
+
+    public void setpId(String pId) {
+        this.pId = pId;
     }
 }
