@@ -26,13 +26,17 @@ import java.util.*;
 public class CrawlerStart {
     private static final Logger log = Logger.getLogger(CrawlerStart.class.getName());
 
+
     private static File file = new File("D:\\region.txt");
 
     private static FileWriter fileWriter;
 
+    private static BufferedWriter bufferedWriter;
+
     static {
         try {
             fileWriter = new FileWriter(file.getAbsoluteFile());
+            bufferedWriter = new BufferedWriter(fileWriter);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -50,45 +54,78 @@ public class CrawlerStart {
         regionNode.setChildNode(list);
         regionNode.setpId("0");
         CrawlerWorker crawlerWorker = new CrawlerWorker(1);
-        RegionNode regionNode1 = crawlerWorker.loadRegionNode(regionNode,"http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/");
-        rescursiveRegionTree(regionNode1,"0");
+        RegionNode regionNode1 = crawlerWorker.loadRegionNode(regionNode,"http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/index.html");
         try {
+            traverseRegionTree(regionNode1,"0");
+            bufferedWriter.close();
             fileWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @Test
-    public void testSubStr(){
-        String code = "210201001000";
-        System.out.println(code.substring(6,9));
+
+    public static void main1(String[] args) throws IOException {
+        String str = "HHHH";
+        StringBuffer strBf = new StringBuffer();
+        for(char ch : str.toCharArray()){
+            bufferedWriter.write(strBf.append(String.valueOf(ch)).toString());
+            bufferedWriter.newLine();
+        }
+        bufferedWriter.close();
     }
-    private static void rescursiveRegionTree(RegionNode regionNode,String pid){
+    private static void traverseRegionTree(RegionNode regionNode,String pid) throws IOException {
         List<RegionNode> regionNodeList = regionNode.getChildNode();
 
         StringBuffer region = new StringBuffer("regionCode:"+regionNode.getId()+";regionName:"+regionNode.getRegionName()+";pid:"+pid);
 
-        try {
-            fileWriter(region);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        bufferedWriter.write(region.toString());
+        bufferedWriter.newLine();
 
         if(regionNodeList == null || regionNodeList.size() == 0){
             return;
         }
 
         for(RegionNode regionNode1:regionNodeList){
-            rescursiveRegionTree(regionNode1,regionNode.getId());
+            traverseRegionTree(regionNode1,regionNode.getId());
         }
 
     }
 
-    private static void fileWriter(StringBuffer sb) throws IOException {
-        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-        bufferedWriter.write(sb.toString());
-        bufferedWriter.close();
+
+    public static String truncateRegionName(String regionName){
+        if(regionName.contains("居委会")){
+            return regionName.split("居")[0];
+        }
+        if(regionName.contains("办事处")){
+            return regionName.split("办")[0];
+        }
+        if(regionName.contains("村委会")){
+            return regionName.split("委")[0];
+        }
+        return regionName;
+    }
+
+    public static String regionLvl(String code){
+
+        if(code.equals("0")){
+            return "0";
+        }
+
+        if(code.length() == 2){
+            return "1";
+        }
+
+        if(code.substring(4,6).equals("00")){
+            return "2";
+        }
+        if(code.substring(6,9).equals("000")){
+            return "3";
+        }
+        if(code.substring(9,12).equals("000")){
+            return "4";
+        }
+        return "5";
     }
 
 }

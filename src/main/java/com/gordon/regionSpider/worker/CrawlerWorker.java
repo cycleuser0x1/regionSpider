@@ -20,8 +20,6 @@ import java.util.logging.Logger;
 public class CrawlerWorker implements Runnable {
     private static final Logger Log = Logger.getLogger(CrawlerWorker.class.getName());
 
-    public static Integer count = 0;
-
     private PageFetcher pageFetcher = new PageFetcher();
 
     private ContentParser contentParser = new ContentParser();
@@ -43,7 +41,6 @@ public class CrawlerWorker implements Runnable {
      */
     public RegionNode loadRegionNode(RegionNode regionNode, String superUrl) {
 
-        count++;
 
         String url = subUrl(superUrl) + regionNode.getUrl();
 
@@ -67,7 +64,7 @@ public class CrawlerWorker implements Runnable {
 
             for (RegionNode node : list) {
                 //该节点为叶子节点且为最后一级
-                if(node.getUrl() == null && node.getId().substring(7,11) != "000" ){
+                if(node.getUrl() == null && !node.getId().substring(6,12).equals("000000")){
                     break;
                 }
 
@@ -77,7 +74,7 @@ public class CrawlerWorker implements Runnable {
         return regionNode;
     }
 
-    private String subUrl(String url) {
+    public static String subUrl(String url) {
         int index = url.lastIndexOf("/") + 1;
         String truncateUrl = url.substring(0, index);
         return truncateUrl;

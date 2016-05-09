@@ -9,6 +9,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
@@ -31,8 +32,8 @@ public class PageFetcher {
     public PageFetcher() {
         //设置超时时间
         HttpParams params = new BasicHttpParams();
-//        HttpConnectionParams.setConnectionTimeout(params, 10 * 1000);
-//        HttpConnectionParams.setSoTimeout(params, 10 * 1000);
+        HttpConnectionParams.setConnectionTimeout(params, 10000 * 1000);
+        HttpConnectionParams.setSoTimeout(params, 10000 * 1000);
         client = new DefaultHttpClient(params);
     }
 

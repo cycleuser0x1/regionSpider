@@ -21,6 +21,8 @@ public class CrawlerStart {
     private static final Logger log = Logger.getLogger(CrawlerStart.class.getName());
 
     public static void main(String[] args) {
+        //370501000000
+        System.out.println("subUrl:"+"370101000000".substring(6,12));
     }
 
 }
