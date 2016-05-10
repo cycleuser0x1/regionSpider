@@ -14,10 +14,8 @@ import com.gordon.regionSpider.worker.CrawlerWorker;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -44,8 +42,8 @@ public class CrawlerStart {
 
     public static void main(String[] args) {
         PageFetcher pageFetcher = new PageFetcher();
-        FetchedPage fetchedPage = pageFetcher.getContentFromUrl("http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/index.html");
-        List<RegionNode> list = ContentParser.parseIndexHTML(fetchedPage);
+        FetchedPage fetchedPage = pageFetcher.getContentFromUrl("http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/11/01/110101.html");
+        List<RegionNode> list = ContentParser.parseHTML(fetchedPage);
         //构造根节点
         RegionNode regionNode = new RegionNode();
         regionNode.setUrl("");
@@ -54,9 +52,9 @@ public class CrawlerStart {
         regionNode.setChildNode(list);
         regionNode.setpId("0");
         CrawlerWorker crawlerWorker = new CrawlerWorker(1);
-        RegionNode regionNode1 = crawlerWorker.loadRegionNode(regionNode,"http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/index.html");
+        RegionNode regionNode1 = crawlerWorker.loadRegionNode(regionNode, "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2014/11/01/110101.html");
         try {
-            traverseRegionTree(regionNode1,"0");
+            traverseRegionTree(regionNode1, "0");
             bufferedWriter.close();
             fileWriter.close();
         } catch (IOException e) {
@@ -68,64 +66,94 @@ public class CrawlerStart {
     public static void main1(String[] args) throws IOException {
         String str = "HHHH";
         StringBuffer strBf = new StringBuffer();
-        for(char ch : str.toCharArray()){
+        for (char ch : str.toCharArray()) {
             bufferedWriter.write(strBf.append(String.valueOf(ch)).toString());
             bufferedWriter.newLine();
         }
         bufferedWriter.close();
     }
-    private static void traverseRegionTree(RegionNode regionNode,String pid) throws IOException {
+
+    private static void traverseRegionTree(RegionNode regionNode, String pid) throws IOException {
         List<RegionNode> regionNodeList = regionNode.getChildNode();
 
-        StringBuffer region = new StringBuffer("regionCode:"+regionNode.getId()+";regionName:"+regionNode.getRegionName()+";pid:"+pid);
+        StringBuffer region = new StringBuffer("regionCode:" + regionNode.getId() + ";regionName:" +
+                truncateRegionName(regionNode.getRegionName()) + ";pid:" + pid + ";lvl:" + regionLvl(regionNode.getpId()));
 
         bufferedWriter.write(region.toString());
         bufferedWriter.newLine();
 
-        if(regionNodeList == null || regionNodeList.size() == 0){
+        if (regionNodeList == null || regionNodeList.size() == 0) {
             return;
         }
 
-        for(RegionNode regionNode1:regionNodeList){
-            traverseRegionTree(regionNode1,regionNode.getId());
+        for (RegionNode regionNode1 : regionNodeList) {
+            traverseRegionTree(regionNode1, regionNode.getId());
         }
 
     }
 
 
-    public static String truncateRegionName(String regionName){
-        if(regionName.contains("居委会")){
+    public static String truncateRegionName(String regionName) {
+        if (regionName.contains("居民委员会")) {
             return regionName.split("居")[0];
         }
-        if(regionName.contains("办事处")){
+        if (regionName.contains("居委会")) {
+            return regionName.split("居")[0];
+        }
+        if (regionName.contains("办事处")) {
             return regionName.split("办")[0];
         }
-        if(regionName.contains("村委会")){
+        if (regionName.contains("村委会")) {
             return regionName.split("委")[0];
         }
         return regionName;
     }
 
-    public static String regionLvl(String code){
+    public static String regionLvl(String code) {
 
-        if(code.equals("0")){
+        if (code.equals("0")) {
             return "0";
         }
 
-        if(code.length() == 2){
+        if (code.length() == 2) {
             return "1";
         }
 
-        if(code.substring(4,6).equals("00")){
+        if (code.substring(4, 6).equals("00")) {
             return "2";
         }
-        if(code.substring(6,9).equals("000")){
+        if (code.substring(6, 9).equals("000")) {
             return "3";
         }
-        if(code.substring(9,12).equals("000")){
+        if (code.substring(9, 12).equals("000")) {
             return "4";
         }
         return "5";
     }
 
+    @Test
+    public void readRegion() throws IOException {
+        File file = new File("D:\\region\\region.txt");
+        File sqlFile = new File("D:\\region\\baseRegion.sql");
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        FileWriter fileWriter = new FileWriter(sqlFile.getAbsoluteFile());
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        while (true) {
+            String regionLine = reader.readLine();
+            if (regionLine == null || regionLine.equals("")) {
+                break;
+            }
+            String regionCode = regionLine.split(";")[0].split(":")[1];
+            String regionName = regionLine.split(";")[1].split(":")[1];
+            String regionPid = regionLine.split(";")[2].split(":")[1];
+            String date = simpleDateFormat.format(new Date());
+            bufferedWriter.write("INSERT INTO `base_region` VALUES ('"+regionCode+"', '"+regionPid+"', '"
+                    +truncateRegionName(regionName)+"', '"+regionLvl(regionCode)+"', '"+date+"');");
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
+        }
+        bufferedWriter.close();
+        fileWriter.close();
+    }
 }
