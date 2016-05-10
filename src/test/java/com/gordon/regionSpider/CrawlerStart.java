@@ -103,6 +103,9 @@ public class CrawlerStart {
         if (regionName.contains("办事处")) {
             return regionName.split("办")[0];
         }
+        if (regionName.contains("村民委员会")) {
+            return regionName.split("民")[0];
+        }
         if (regionName.contains("村委会")) {
             return regionName.split("委")[0];
         }
