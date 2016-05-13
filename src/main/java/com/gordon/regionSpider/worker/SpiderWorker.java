@@ -1,13 +1,9 @@
 package com.gordon.regionSpider.worker;
 
-import com.gordon.regionSpider.constants.CrawlerParams;
 import com.gordon.regionSpider.fetcher.PageFetcher;
-import com.gordon.regionSpider.filter.ProductFilter;
-import com.gordon.regionSpider.model.DiscountProduct;
 import com.gordon.regionSpider.model.FetchedPage;
-import com.gordon.regionSpider.model.RegionNode;
+import com.gordon.regionSpider.model.RegionTreeNode;
 import com.gordon.regionSpider.parser.ContentParser;
-import com.gordon.regionSpider.queue.FilteredDiscountProductQueue;
 import com.gordon.regionSpider.storage.DataStorage;
 import com.gordon.regionSpider.storage.impl.ListStorage;
 
@@ -17,36 +13,32 @@ import java.util.logging.Logger;
 /**
  * Created by wwz on 2016/2/22.
  */
-public class CrawlerWorker implements Runnable {
-    private static final Logger Log = Logger.getLogger(CrawlerWorker.class.getName());
+public class SpiderWorker  {
+    private static final Logger Log = Logger.getLogger(SpiderWorker.class.getName());
 
     private PageFetcher pageFetcher = new PageFetcher();
 
     private ContentParser contentParser = new ContentParser();
-
-    private DataStorage dataStorage = ListStorage.getInstance();
 
     private int threadIndex;
 
     private Integer page = 1;
 
 
-    public CrawlerWorker(int i) {
-        this.threadIndex = i;
-    }
-
-
     /**
+     * 递归访问页面，并构造子节点
      * @param regionNode
+     * @param superUrl
+     * @return
      */
-    public RegionNode loadRegionNode(RegionNode regionNode, String superUrl) {
+    public RegionTreeNode loadRegionNode(RegionTreeNode regionNode, String superUrl) {
 
 
         String url = subUrl(superUrl) + regionNode.getUrl();
 
         FetchedPage fetchedPage = pageFetcher.getContentFromUrl(url);
 
-        List<RegionNode> list;
+        List<RegionTreeNode> list;
         //首页数据已经预先加载
         if (regionNode.getChildNode() == null) {
 
@@ -62,7 +54,7 @@ public class CrawlerWorker implements Runnable {
             //将子节点插入
             regionNode.setChildNode(list);
 
-            for (RegionNode node : list) {
+            for (RegionTreeNode node : list) {
                 //该节点为叶子节点且为最后一级
                 if(node.getUrl() == null && !node.getId().substring(6,12).equals("000000")){
                     break;
@@ -74,6 +66,11 @@ public class CrawlerWorker implements Runnable {
         return regionNode;
     }
 
+    /**
+     * 截取上级url
+     * @param url
+     * @return
+     */
     public static String subUrl(String url) {
         int index = url.lastIndexOf("/") + 1;
         String truncateUrl = url.substring(0, index);
@@ -81,7 +78,4 @@ public class CrawlerWorker implements Runnable {
     }
 
 
-    public void run() {
-
-    }
 }

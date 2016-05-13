@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class TimeUtil {
     private static final Logger log = Logger.getLogger(TimeUtil.class.getName());
-
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     /**
      * 将格式化时间转换为Date对象
      *
@@ -35,7 +35,6 @@ public class TimeUtil {
      */
     public static String getTimeStamp() {
         Date nowDate = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         return sdf.format(nowDate);
     }
 }

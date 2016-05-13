@@ -1,10 +1,7 @@
 package com.gordon.regionSpider.parser;
 
-import com.gordon.regionSpider.constants.CrawlerParams;
-import com.gordon.regionSpider.model.DiscountProduct;
 import com.gordon.regionSpider.model.FetchedPage;
-import com.gordon.regionSpider.model.RegionNode;
-import com.gordon.regionSpider.util.TimeUtil;
+import com.gordon.regionSpider.model.RegionTreeNode;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,7 +9,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,15 +18,16 @@ public class ContentParser {
     private static final Logger log = Logger.getLogger(ContentParser.class.getName());
 
     /**
+     * 解析地区页面，返回当前页面的地区节点集合
      * @param fetchedPage
      * @return
      */
-    public static List<RegionNode> parseHTML(FetchedPage fetchedPage) {
+    public static List<RegionTreeNode> parseHTML(FetchedPage fetchedPage) {
         //当抓取的页面为空或者返回状态码不是200返回空
         if (fetchedPage == null || fetchedPage.getStatusCode() != 200) {
             return null;
         }
-        List<RegionNode> regionNodeList = new ArrayList<RegionNode>();
+        List<RegionTreeNode> regionNodeList = new ArrayList<RegionTreeNode>();
         Document doc = Jsoup.parse(fetchedPage.getContent());
         //获取当前页面中的地区节点
         Elements tableSet = doc.getElementsByTag("TABLE");
@@ -46,7 +43,7 @@ public class ContentParser {
                 Element nameTdTag = elements.get(2);
                 String name = nameTdTag.text();
                 String code = codeTdTag.text();
-                RegionNode regionNode = new RegionNode();
+                RegionTreeNode regionNode = new RegionTreeNode();
                 regionNode.setRegionName(name);
                 regionNode.setId(code);
                 regionNodeList.add(regionNode);
@@ -60,7 +57,7 @@ public class ContentParser {
                 Element nameTdTag = elements.get(3);
                 String name = nameTdTag.text();
                 String code = codeTdTag.text();
-                RegionNode regionNode = new RegionNode();
+                RegionTreeNode regionNode = new RegionTreeNode();
                 regionNode.setRegionName(name);
                 regionNode.setId(code);
                 regionNodeList.add(regionNode);
@@ -72,7 +69,7 @@ public class ContentParser {
             String href = codeATag.attr("href");
             String code = codeATag.text();
             String name = nameATag.text();
-            RegionNode regionNode = new RegionNode();
+            RegionTreeNode regionNode = new RegionTreeNode();
             regionNode.setId(code);
             regionNode.setRegionName(name);
             regionNode.setUrl(href);
@@ -83,15 +80,16 @@ public class ContentParser {
     }
 
     /**
+     * 解析首页数据，返回首页地区节点集合
      * @param fetchedPage
      * @return
      */
-    public static List<RegionNode> parseIndexHTML(FetchedPage fetchedPage) {
+    public static List<RegionTreeNode> parseIndexHTML(FetchedPage fetchedPage) {
         //当抓取的页面为空或者返回状态码不是200返回空
         if (fetchedPage == null || fetchedPage.getStatusCode() != 200) {
             return null;
         }
-        List<RegionNode> regionNodeList = new ArrayList<RegionNode>();
+        List<RegionTreeNode> regionNodeList = new ArrayList<RegionTreeNode>();
         Document doc = Jsoup.parse(fetchedPage.getContent());
         //获取首页中的地区节点
         Elements tableSet = doc.getElementsByTag("TABLE");
@@ -109,7 +107,7 @@ public class ContentParser {
                 String code = href.substring(0, end);
                 String name = aTag.text();
                 System.out.println("code:"+code+";name:"+name+";href:"+href);
-                RegionNode regionNode = new RegionNode();
+                RegionTreeNode regionNode = new RegionTreeNode();
                 regionNode.setId(code);
                 regionNode.setRegionName(name);
                 regionNode.setUrl(href);

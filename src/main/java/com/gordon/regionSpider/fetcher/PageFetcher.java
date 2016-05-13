@@ -2,6 +2,7 @@ package com.gordon.regionSpider.fetcher;
 
 import com.gordon.regionSpider.constants.ContentType;
 import com.gordon.regionSpider.model.FetchedPage;
+import com.gordon.regionSpider.util.TimeUtil;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -69,10 +70,9 @@ public class PageFetcher {
         HttpResponse response;
         //为了防止请求服务器出现异常，此处要捕获所有异常
         try {
-            System.out.println("start time:"+sdf.format(now));
+            System.out.println("start time:" + TimeUtil.getTimeStamp());
             response = client.execute(get);
-            now = new Date();
-            System.out.println("end time:"+sdf.format(now));
+            System.out.println("end time:" + TimeUtil.getTimeStamp());
             //获得响应状态码
             statusCode = response.getStatusLine().getStatusCode();
             //获得响应体

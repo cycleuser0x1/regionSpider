@@ -5,11 +5,11 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/5/3.
  */
-public class RegionNode {
+public class RegionTreeNode {
     private String url;
     private String regionName;
     private String id;
-    private List<RegionNode> childNode;
+    private List<RegionTreeNode> childNode;
     private String pId;
 
     public String getUrl() {
@@ -36,11 +36,11 @@ public class RegionNode {
         this.id = id;
     }
 
-    public List<RegionNode> getChildNode() {
+    public List<RegionTreeNode> getChildNode() {
         return childNode;
     }
 
-    public void setChildNode(List<RegionNode> childNode) {
+    public void setChildNode(List<RegionTreeNode> childNode) {
         this.childNode = childNode;
     }
 
