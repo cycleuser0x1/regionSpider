@@ -5,6 +5,11 @@ package com.gordon.regionSpider.util;
  */
 public class RegionUtil {
 
+    /**
+     * 截取地区名称（截掉‘委员会’，‘办事处’字样的地区名）
+     * @param regionName
+     * @return
+     */
     public static String truncateRegionName(String regionName) {
         if (regionName.contains("居民委员会")) {
             return regionName.split("居")[0];
@@ -24,6 +29,12 @@ public class RegionUtil {
         return regionName;
     }
 
+    /**
+     * 根据地区码返回地区级别
+     * 分为5个等级（0：最高级别；1：省，直辖市；2：地级市，3：区，县；4：乡镇，街道；5：村）
+     * @param code
+     * @return
+     */
     public static String regionLvl(String code) {
 
         if (code.equals("0")) {
